@@ -13,25 +13,30 @@ var spotify = new Spotify(keys.spotify)
 
 //=======================================================
 //variable for command 
-let command = process.argv[2];
-let secondCom = process.argv[3];
+// let command = process.argv[2];
+// let secondCom = process.argv[3];
 
-switch (command) {
-    case ("concert-this"):
-        concertThis(secondCom);
-        break;
-    case "spotify-this-song":
-        spotifyThis(secondCom);
-        break;
-    case "movie-this":
-        movieThis(secondCom);
-        break;
-    case "do-what-it-says":
-        doWhat();
-        break;
-    default:console.log("Try Again")
-        break;
-};
+// ********** I ADDED YOUR SWITCH INSIDE OF A FUNCTION, SO WE CAN RE USE AN RE CALL THE SWITCH WHENEVER WE WANT.
+let actionable = function (command, secondCom) {
+
+    switch (command) {
+        case ("concert-this"):
+            concertThis(secondCom);
+            break;
+        case "spotify-this-song":
+            spotifyThis(secondCom);
+            break;
+        case "movie-this":
+            movieThis(secondCom);
+            break;
+        case "do-what-it-says":
+            doWhat();
+            break;
+        default: console.log("Try Again")
+            break;
+    };
+}
+
 
 function spotifyThis(song) {
     spotify.search({ type: "track", query: song, limit: 1 }, function (err, data) {
@@ -68,7 +73,7 @@ function movieThis(secondCom) {
             console.log("Language: " + response.data.Language);
             console.log("Plot: " + response.data.Plot);
             console.log("Actors: " + response.data.Actors);
-            console.log("Rotten Tomatoes Rating: " + response.data.tomatoRating);
+            console.log("Rotten Tomatoes Rating: " + response.data.Ratings[1].Value);
             console.log("Rotten Tomatoes URL: " + response.data.tomatoURL);
         })
         .catch(function (err) {
@@ -94,13 +99,13 @@ function movieThis(secondCom) {
 
 }
 
-function concertThis(artist){
+function concertThis(artist) {
     let queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
-    axios.get(queryUrl).then(function(response) {
+    axios.get(queryUrl).then(function (response) {
 
         // Saving response into variable 
         let concerts = response.data;
-    
+
         // Loop through response data array to obtain specific data from bands in town api
         for (let i = 0; i < concerts.length; i++) {
 
@@ -113,16 +118,21 @@ function concertThis(artist){
         }
 
     })
-    .catch((error) => {
-        if (error) {
-            console.log(error)
-        }
-    })
+        .catch((error) => {
+            if (error) {
+                console.log(error)
+            }
+        })
 }
 
-function doWhat(){
-    fs.readFile('random.txt', "utf8", function(error, data){
+function doWhat() {
+    fs.readFile('random.txt', "utf8", function (error, data) {
         let randomTxt = data.split(',');
-        
-        spotifyThis(randomTxt[2]);
-})};
+        // AFTER THE FILE IS READ AND SPLIT, WE'RE GOING TO CALL THE FUNCTION THAT CONTAINS THE SWITCH, AND WE'RE GOING TO GIVE
+        // THE ELEMENTS IN THE TXT FILES AS ARGUMENTS, WHICH WILL RUN THE SWITCH. BASICALLY randomTxt[0] IS ASSIGNED IN THE SWITCH TO command 
+        // AND randomTxt[1] is assigned to secondCom and the switch will run with the proper parameters.
+        actionable(randomTxt[0], randomTxt[1]);
+    })
+};
+
+actionable(process.argv[2], process.argv[3]);
